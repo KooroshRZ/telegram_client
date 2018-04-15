@@ -9,8 +9,7 @@ client = TelegramClient('session', api_id, api_hash)
 client.start()
 
 
-def count_members_pm(entity, entity_type):
-
+def count_members_pm(entity, entity_type, msg_limit):
     temp_participants = []
 
     # indexing users fro better performance
@@ -37,29 +36,36 @@ def count_members_pm(entity, entity_type):
 
     index = 0
     for participant in temp_participants:
-        index_to_id_participants[index] = participant.id
-        id_to_name_participants[participant.id] = str(participant.first_name)
-        if participant.last_name:
-            id_to_name_participants[participant.id] += " " + str(participant.last_name)
 
-        index += 1
+        if participant.first_name:
+            index_to_id_participants[index] = participant.id
+            id_to_name_participants[participant.id] = str(participant.first_name)
+            if participant.last_name:
+                id_to_name_participants[participant.id] += " " + str(participant.last_name)
+
+            index += 1
 
     i = 0
-    while not i == len(index_to_id_participants):
+    while not i == index:
         name_to_count_participants[id_to_name_participants[index_to_id_participants[i]]] = 0
         i += 1
 
-    for msg in client.get_messages(entity, limit=100):
-        name_to_count_participants[utils.get_display_name(msg.sender)] += 1
+    for msg in client.get_messages(entity, limit=msg_limit):
+        try:
+            name_to_count_participants[id_to_name_participants[msg.from_id]] += 1
+        except Exception as e:
+            # print(e, " not exits!")
+            pass
 
     i = 0
-    while not i == len(index_to_id_participants):
-        print(str(id_to_name_participants[index_to_id_participants[i]]) + " : " + str(name_to_count_participants[id_to_name_participants[index_to_id_participants[i]]]))
+    while not i == index:
+        print(name_to_count_participants.popitem())
         i += 1
 
 
 if __name__ == '__main__':
     entity_name = input("enter entity name >> ")
+    msg_limit = input("enter messages limit >> ")
     for dialog in client.get_dialogs(limit=1000):
         if dialog.name == entity_name:
             if hasattr(dialog.entity, 'broadcast') and dialog.entity.broadcast:
@@ -70,4 +76,4 @@ if __name__ == '__main__':
                     entity_type = 'super_group'
                 else:
                     entity_type = 'group'
-                count_members_pm(dialog.entity, entity_type)
+                count_members_pm(dialog.entity, entity_type, msg_limit)
