@@ -2,8 +2,8 @@ from telethon import TelegramClient, utils
 from telethon.tl.functions.channels import GetParticipantsRequest
 from telethon.tl.types import ChannelParticipantsSearch
 
-api_id = 108053
-api_hash = 'fb9821da924fcc292bdfe184786cd6e8'
+api_id = 0
+api_hash = ''
 
 client = TelegramClient('session', api_id, api_hash)
 client.start()
